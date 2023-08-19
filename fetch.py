@@ -14,9 +14,7 @@ STORAGE_DIR = os.path.join(sys.path[0], 'pages')
 
 def save_asset(url, save_path):
     try:
-        response = requests.get(url, stream=True)
-        response.raise_for_status()
-
+        response = make_request(url, True)
         with open(save_path, 'wb') as file:
             for chunk in response.iter_content(8192):
                 file.write(chunk)
@@ -29,9 +27,7 @@ def save_asset(url, save_path):
 def fetch_url(url):
     try:
         ### 1. Let's fetch the page's HTML ###
-
-        response = requests.get(url)
-        response.raise_for_status()
+        response = make_request(url)
 
         # Parse the page using BeautifulSoup
         soup = BeautifulSoup(response.text, 'html.parser')
@@ -98,6 +94,19 @@ def fetch_url(url):
 
     except requests.RequestException as e:
         print(f"Error fetching {url}: {e}")
+
+
+def make_request(url: str, stream: bool=False):
+    response = requests.get(url, stream=stream, headers={
+        'X-Requested-With': 'XMLHttpRequest',
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_10_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.95 Safari/537.36',
+        'Accept': '*/*',
+        'Connection': 'keep-alive',
+        'Pragma': 'no-cache',
+        'Cache-Control': 'no-cache'
+    })
+    response.raise_for_status()
+    return response
 
 
 def main():
