@@ -25,6 +25,10 @@ def save_asset(url, save_path):
                 file.write(chunk)
     except requests.RequestException as e:
         print(f"Error fetching {url}: {e}")
+    except TypeError as e:
+        print(f"Error writing to a file {url}: {e}")
+        with open(save_path, 'wt') as file:
+            file.write('')
 
 
 ### Fetches the page from the given url: ###
