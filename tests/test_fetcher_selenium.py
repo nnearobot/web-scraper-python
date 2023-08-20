@@ -1,14 +1,15 @@
 import os
 import sys
 import unittest
-from unittest.mock import patch, Mock
+from unittest.mock import patch, Mock, PropertyMock
 
-from fetcher import Fetcher
+from fetcherSelenium import FetcherSelenium
 
 class TestFetcher(unittest.TestCase):
 
-    @patch('fetcher.requests.get')
-    def test_fetch_successful(self, mock_get):
+    @patch('fetcherSelenium.requests.get')
+    @patch("fetcherSelenium.webdriver.Chrome")
+    def test_fetch_successful(self, MockChrome, mock_get):
         sample_html = '<html><body><a href="#">Link</a><img src="image1.jpg" /><img src="image2.jpg" /></body></html>'
 
         # Mocking the response from requests.get
@@ -17,9 +18,13 @@ class TestFetcher(unittest.TestCase):
         mock_response.raise_for_status = Mock()
         mock_get.return_value = mock_response
 
+        # Mocking the driver and its methods
+        mock_driver_instance = MockChrome.return_value
+        type(mock_driver_instance).page_source = PropertyMock(return_value=sample_html)
+
         save_dir = os.path.join(sys.path[0], 'tests')
 
-        fetcher = Fetcher(save_dir)
+        fetcher = FetcherSelenium(save_dir)
         res = fetcher.fetch("http://example.com")
 
         # Check if the output file exists
@@ -34,6 +39,8 @@ class TestFetcher(unittest.TestCase):
         self.assertTrue(os.path.exists(assets_path))
         self.assertTrue(os.path.exists(image1_path))
         self.assertTrue(os.path.exists(image2_path))
+
+        fetcher.close()
 
         self.assertEqual(res['filename'], "example.com.html")
         self.assertEqual(res['links_num'], 1)
