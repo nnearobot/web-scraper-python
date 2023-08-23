@@ -32,7 +32,6 @@ This command maps the "pages" directory in the current directory of the host to 
 
 The console logs will display:
 
-The logs in the console will be:
 ```bash
 Fetching https://www.google.com...
 Fetched https://www.google.com at 2023-08-20 11:32:12
